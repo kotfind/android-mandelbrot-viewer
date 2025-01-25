@@ -1,3 +1,4 @@
 .gradle
 kls_database.db
 build
+.direnv
