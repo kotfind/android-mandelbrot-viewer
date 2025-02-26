@@ -1,12 +1,17 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
+set -o
+
+cd "$(dirname "$0")"
+
+ANDROID_SERIAL="$(adb devices | awk '/emulator/ { print $1; }')"
+export ANDROID_SERIAL
 
 if [ -z "$ANDROID_SERIAL" ]; then
     echo "error: \$ANDROID_SERIAL not defined"
-    exit -1
+    exit 1
 fi
 
-adb connect "$ANDROID_SERIAL"
 gradle installDebug
 adb shell am start -n com.kotfind.android_course/.MainActivity
