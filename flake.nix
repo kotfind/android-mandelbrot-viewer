@@ -65,11 +65,10 @@
                 name = "Android Development Environment";
 
                 targetPkgs = pkgs:
-                    ([
+                    [
                         pkgs.gradle
-                    ])
+                    ]
                     ++ (with androidComposition; [
-                        build-tools
                         platform-tools
                         tools
                     ]);
