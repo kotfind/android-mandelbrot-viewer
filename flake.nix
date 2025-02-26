@@ -39,55 +39,79 @@
             };
 
             sdkDir = "${androidComposition.androidsdk}/libexec/android-sdk";
-
-            extraPath = lib.concatMapStringsSep
-                ":"
-                (path: "${sdkDir}/${path}")
-                [
-                    "platform-tools"
-                    "tools/bin"
-                ];
-
             env = /* bash */ ''
                 export ANDROID_HOME="${sdkDir}"
                 export ANDROID_NDK_ROOT="${sdkDir}/ndk-bundle"
                 export ANDROID_SDK_ROOT="${sdkDir}"
 
                 export GRADLE_OPTS="-Dorg.gradle.project.android.aapt2FromMavenOverride=${sdkDir}/build-tools/${buildToolsVersion}/aapt2"
-
-                export PATH="${extraPath}:$PATH"
             '';
 
             # Note: in `./.avd/device.avd/config.ini` set
             # `hw.keyboard` and `hw.mainKeys` to `yes`.
             # source: https://stackoverflow.com/a/64877532
-            emu = pkgs.androidenv.emulateApp {
-                name = "emu";
+            emulator = pkgs.androidenv.emulateApp {
+                name = "emulator";
                 inherit platformVersion abiVersion systemImageType;
                 avdHomeDir = "./.avd";
             };
 
-            app = pkgs.writeShellScriptBin "emulator-app" ''
+            emulatorScript = pkgs.writeShellScriptBin "emulator" ''
                 ${env}
-                ${lib.getExe' emu "run-test-emulator"}
+                ${lib.getExe' emulator "run-test-emulator"}
             '';
-        in
-        {
-            devShells.${system}.default = (pkgs.buildFHSEnv {
-                name = "Android Development Shell";
 
-                targetPkgs = pkgs: with pkgs; [
-                    gradle
-                ];
+            fhsEnv = (pkgs.buildFHSEnv {
+                name = "Android Development Environment";
+
+                targetPkgs = pkgs:
+                    ([
+                        pkgs.gradle
+                    ])
+                    ++ (with androidComposition; [
+                        build-tools
+                        platform-tools
+                        tools
+                    ]);
 
                 profile = env;
 
                 runScript = "bash";
             }).env;
 
-            apps.${system}.default = {
-                type = "app";
-                program = lib.getExe app;
+            adb = lib.getExe' androidComposition.platform-tools "adb";
+            awk = lib.getExe pkgs.gawk;
+            gradle = lib.getExe pkgs.gradle;
+
+            runScript = pkgs.writeShellScriptBin "run" ''
+                set -euo pipefail
+                set -o
+
+                ANDROID_SERIAL="$(${adb} devices | ${awk} '/emulator/ { print $1; }')"
+                export ANDROID_SERIAL
+
+                if [ -z "$ANDROID_SERIAL" ]; then
+                    echo "error: no emulators are running"
+                    exit 1
+                fi
+
+                ${gradle} installDebug
+                ${adb} shell am start -n com.kotfind.android_course/.MainActivity
+            '';
+        in
+        {
+            devShells.${system}.default = fhsEnv;
+
+            apps.${system} = {
+                emulator = {
+                    type = "app";
+                    program = lib.getExe emulatorScript;
+                };
+
+                run = {
+                    type = "app";
+                    program = lib.getExe runScript;
+                };
             };
         };
 }
