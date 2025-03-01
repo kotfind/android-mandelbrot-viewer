@@ -89,59 +89,17 @@
       adb = lib.getExe' androidComposition.platform-tools "adb";
       awk = lib.getExe pkgs.gawk;
       gradle = lib.getExe pkgs.gradle;
-      echo = lib.getExe pkgs.toybox "echo";
+      echo = lib.getExe' pkgs.toybox "echo";
     in
       pkgs.writeShellScriptBin "run" ''
         set -euo pipefail
         set -o
 
-        usage() {
-          ${echo} ${lib.escapeShellArg (
-          ""
-          + "Usage:\n"
-          + "    run [OPTIONS]\n"
-          + "\n"
-          + "Description:\n"
-          + "    Compiles the app and runs in on either\n"
-          + "    emulator (by default) on actual device (-d flag).\n"
-          + "\n"
-          + "Options:\n"
-          + "    -h    print this message\n"
-          + "    -d    try runnnig on non-emulator device\n"
-        )} 1>&2
-        }
-
-        on_emulator=true
-
-        while getopts ":hd" opt; do
-          case "$opt" in
-            'h')
-              usage
-              exit 0
-              ;;
-
-            'd')
-              on_emulator=false
-              ;;
-
-            *)
-              usage
-              exit 1
-              ;;
-          esac
-        done
-
-        if [ "$on_emulator" == true ]; then
-          neg=""
-        else
-          neg="!"
-        fi
-
-        ANDROID_SERIAL="$(${adb} devices | ${awk} "$neg/emulator/ { print \$1; }")"
+        ANDROID_SERIAL="$(${adb} devices | ${awk} "/emulator/ { print \$1; }")"
         export ANDROID_SERIAL
 
         if [ -z "$ANDROID_SERIAL" ]; then
-          ${echo} "error: no devices (emulators) found"
+          ${echo} "error: no emulators found"
           exit 1
         fi
 
