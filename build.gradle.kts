@@ -9,10 +9,11 @@ android {
 
     defaultConfig {
         applicationId = "com.kotfind.android_course"
+        versionName = "1.0"
+        versionCode = 1
+
         minSdk = 30
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
 
         vectorDrawables { useSupportLibrary = true }
     }
@@ -46,5 +47,4 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.material3)
-    debugImplementation(libs.androidx.ui.test.manifest)
 }
