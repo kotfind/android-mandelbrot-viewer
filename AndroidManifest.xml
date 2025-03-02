@@ -5,8 +5,7 @@
     <application
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Example"
-        tools:targetApi="34">
+        android:theme="@style/Theme.Example">
 
         <activity
             android:name=".MainActivity"
