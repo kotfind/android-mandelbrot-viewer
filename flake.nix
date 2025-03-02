@@ -105,6 +105,7 @@
         export ANDROID_SDK_ROOT="${sdkDir}"
 
         export GRADLE_OPTS="-Dorg.gradle.project.android.aapt2FromMavenOverride=${sdkDir}/build-tools/${cfg.versions.build-tools}/aapt2"
+        export GRADLE_USER_HOME="$(realpath .)/.gradle-home"
 
         ${cfgExport}
       '';

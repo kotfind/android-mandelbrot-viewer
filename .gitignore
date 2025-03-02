@@ -1,5 +1,5 @@
-.gradle
-kls_database.db
-build
-.direnv
 .avd
+.gradle
+.gradle-home
+build
+kls_database.db
