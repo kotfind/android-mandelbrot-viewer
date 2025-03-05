@@ -16,6 +16,14 @@
     # or
     #     just specify random one and check the error message
     cfg = {
+      app = {
+        # will be passed as a project flavor:
+        #     https://developer.android.com/build/build-variants#product-flavors
+        flavor = "master";
+      };
+
+      system-image-type = "default";
+
       versions = {
         # SDK to Android version mapping:
         #     https://developer.android.com/tools/releases/platforms
@@ -45,7 +53,6 @@
         emulator = "35.4.6";
         ndk = "22.1.7171670";
       };
-      system-image-type = "default";
     };
 
     androidComposition = pkgs.androidenv.composeAndroidPackages (with cfg.versions; {
@@ -153,6 +160,12 @@
       awk = lib.getExe pkgs.gawk;
       gradle = lib.getExe pkgs.gradle;
       echo = lib.getExe' pkgs.toybox "echo";
+
+      firstLetterToUpper = str:
+        lib.strings.toUpper (builtins.substring 0 1 str)
+        + builtins.substring 1 ((builtins.stringLength str) - 1) str;
+
+      gradleSubCommand = "install" + firstLetterToUpper cfg.app.flavor + "Debug";
     in
       pkgs.writeShellScriptBin "run" ''
         set -euo pipefail
@@ -166,8 +179,8 @@
           exit 1
         fi
 
-        ${gradle} installDebug
-        ${adb} shell am start -n com.kotfind.android_course/.MainActivity
+        ${gradle} ${gradleSubCommand}
+        ${adb} shell monkey -p com.kotfind.android_course.${cfg.app.flavor} -c android.intent.category.LAUNCHER 1
       '';
   in {
     devShells.${system}.default = fhsEnv;

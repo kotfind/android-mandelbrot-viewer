@@ -41,6 +41,17 @@ android {
     buildToolsVersion = env("CFG_VERSIONS_BUILD_TOOLS")
     ndkVersion = env("CFG_VERSIONS_NDK")
     externalNativeBuild { cmake { version = env("CFG_VERSIONS_CMAKE") } }
+
+    flavorDimensions += "default"
+    productFlavors {
+        val flavor = env<String>("CFG_APP_FLAVOR")
+
+        create(flavor) {
+            dimension = "default"
+            applicationIdSuffix = ".${flavor}"
+            versionNameSuffix = "-${flavor}"
+        }
+    }
 }
 
 dependencies {
