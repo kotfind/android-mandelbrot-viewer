@@ -1,14 +1,16 @@
+val packageName = env<String>("CFG_APP_PACKAGE")
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
 }
 
 android {
-    namespace = "com.kotfind.android_course"
+    namespace = packageName
     compileSdk = env("CFG_VERSIONS_SDK_COMPILE")
 
     defaultConfig {
-        applicationId = "com.kotfind.android_course"
+        applicationId = packageName
         versionName = "1.0"
         versionCode = 1
 
@@ -62,6 +64,43 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.material3)
+}
+
+// Checks if all source files have right package name
+tasks.register("checkSourceFilesPackage") {
+    group = "verification"
+
+    doLast {
+        fileTree("src")
+            .filter { it.isFile && it.extension == "kt" }
+            .forEach { file ->
+                val packageRegex = Regex("^\\s*package\\s*([a-zA-Z0-9_\\.]+)\\s*$")
+                file.useLines { lines ->
+                    var packageIsDefined = false
+                    for (line in lines) {
+                        val match = packageRegex.find(line)
+                        if (match == null) {
+                            continue
+                        }
+                        val filePackage = match.groupValues[1]
+                        if (filePackage != packageName &&
+                            !filePackage.startsWith(packageName + ".")) {
+                            throw GradleException(
+                                "Package '$filePackage' (defined in '$file') is not a subpackage of main package '$packageName' (defined in flake.nix)")
+                        }
+                        packageIsDefined = true
+                        break
+                    }
+                    if (!packageIsDefined) {
+                        throw GradleException("File '$file' has no package definition")
+                    }
+                }
+            }
+    }
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    dependsOn("checkSourceFilesPackage")
 }
 
 inline fun <reified T> env(env_name: String): T {

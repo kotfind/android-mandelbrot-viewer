@@ -20,6 +20,7 @@
         # will be passed as a project flavor:
         #     https://developer.android.com/build/build-variants#product-flavors
         flavor = "master";
+        package = "org.kotfind.android_course";
       };
 
       system-image-type = "default";
@@ -166,6 +167,7 @@
         + builtins.substring 1 ((builtins.stringLength str) - 1) str;
 
       gradleSubCommand = "install" + firstLetterToUpper cfg.app.flavor + "Debug";
+      fullPackageName = with cfg.app; package + "." + flavor;
     in
       pkgs.writeShellScriptBin "run" ''
         set -euo pipefail
@@ -180,7 +182,7 @@
         fi
 
         ${gradle} ${gradleSubCommand}
-        ${adb} shell monkey -p com.kotfind.android_course.${cfg.app.flavor} -c android.intent.category.LAUNCHER 1
+        ${adb} shell monkey -p ${fullPackageName} -c android.intent.category.LAUNCHER 1
       '';
   in {
     devShells.${system}.default = fhsEnv;

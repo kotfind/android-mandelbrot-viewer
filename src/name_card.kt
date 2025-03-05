@@ -1,4 +1,4 @@
-package com.kotfind.android_course
+package org.kotfind.android_course
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.*
