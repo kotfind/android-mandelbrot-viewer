@@ -3,6 +3,9 @@ val packageName = env<String>("CFG_APP_PACKAGE")
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.benmanes.versions)
+    alias(libs.plugins.littlerobots.versionCatalogUpdate)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -127,3 +130,18 @@ inline fun <reified T> env(env_name: String): T {
             e)
     }
 }
+
+// source:
+// https://github.com/ben-manes/gradle-versions-plugin?tab=readme-ov-file#rejectversionsif-and-componentselection
+fun isNonStable(version: String): Boolean {
+    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.uppercase().contains(it) }
+    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
+    val isStable = stableKeyword || regex.matches(version)
+    return isStable.not()
+}
+
+tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask> {
+    rejectVersionIf { isNonStable(candidate.version) && !isNonStable(currentVersion) }
+}
+
+versionCatalogUpdate { catalogFile.set(file("./libs.versions.toml")) }

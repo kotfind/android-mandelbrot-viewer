@@ -1,4 +1,6 @@
 {
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
   outputs = {nixpkgs, ...}: let
     system = "x86_64-linux";
     pkgs = import nixpkgs {
@@ -31,7 +33,7 @@
         # Difference between compileSdk, targetSdk and minSdk:
         #     https://stackoverflow.com/a/47269079
         sdk = rec {
-          compile = "34";
+          compile = "35";
           target = "34";
           min = "30";
 
@@ -51,7 +53,7 @@
         cmdline-tools = "9.0";
         platform-tools = "35.0.2";
         cmake = "3.31.4";
-        emulator = "35.4.6";
+        emulator = "35.5.2";
         ndk = "22.1.7171670";
       };
     };
