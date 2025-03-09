@@ -52,9 +52,9 @@
         build-tools = "35.0.1";
         cmdline-tools = "9.0";
         platform-tools = "35.0.2";
-        cmake = "3.31.4";
+        cmake = "3.31.5";
         emulator = "35.5.2";
-        ndk = "22.1.7171670";
+        ndk = "28.0.13004108";
       };
     };
 
