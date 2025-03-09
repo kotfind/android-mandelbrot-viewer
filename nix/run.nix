@@ -30,7 +30,7 @@
   checkGroup = deviceType: let
     groupName =
       if deviceType == "device"
-      then "adbuser"
+      then "adbusers"
       else if deviceType == "emulator"
       then "kvm"
       else throw "unreachable";
@@ -42,12 +42,12 @@
         bash
         */
         ''
-          if [ "$(${id} -nG "$USER")" | ${grep} -wq '${groupName}' ]; then
+          if ${id} -nG "$USER" | ${grep} -wq '${groupName}' ; then
             ${boxes} -d parchment <(echo ${
             lib.escapeShellArg
             ("WARNING:\n"
-              + "current user is not in a group ${groupName}\n"
-              + "did you forget to configure your system?")
+              + "Current user is not in a group '${groupName}'.\n"
+              + "Did you forget to configure your system?")
           })
           fi
         ''
@@ -128,19 +128,19 @@
 in {
   scripts = {
     run = genRunScript {
-      scriptName = "run";
+      scriptName = "run-android-app";
       gradleAction = "install";
       buildType = "debug";
       deviceType = "emulator";
     };
     install = genRunScript {
-      scriptName = "install";
+      scriptName = "install-android-app";
       gradleAction = "install";
       buildType = "debug";
       deviceType = "device";
     };
     assemble = genRunScript {
-      scriptName = "assemble";
+      scriptName = "assemble-android-app";
       gradleAction = "assemble";
       buildType = "debug";
       deviceType = "none";
