@@ -5,12 +5,29 @@
   lib,
   ...
 }: let
-  # Note: in `./.avd/device.avd/config.ini` set
-  # `hw.keyboard` and `hw.mainKeys` to `yes`.
-  # source: https://stackoverflow.com/a/64877532
   emulatorPkg = pkgs.androidenv.emulateApp ({
       name = "emulator";
-      avdHomeDir = "./.avd";
+
+      androidAvdHome = "./.avd";
+      androidUserHome = "./.android-user-home";
+
+      # all options:
+      #     https://developer.android.com/studio/run/emulator-commandline
+      # androidEmulatorFlags = "";
+
+      # all options:
+      #     https://gist.github.com/emmarq/c35a81c17fffa94989ca3e6b6d4cb0f8
+      configOptions = {
+        "hw.camera.back" = "emulated";
+        "hw.camera.front" = "emulated";
+
+        "hw.lcd.width" = "320";
+        "hw.lcd.height" = "640";
+        "hw.lcd.density" = "160";
+
+        "hw.keyboard" = "yes";
+        "hw.mainKeys" = "yes";
+      };
     }
     // (with cfg.versions; {
       platformVersion = sdk.emulator;
@@ -19,7 +36,7 @@
     }));
 
   fhs = lib.getExe config.fhs;
-  emulator = lib.getExe' emulatorPkg "run-test-emulator";
+  emulator = lib.getExe emulatorPkg;
 
   emulatorScript = pkgs.writeScriptBin "emulator" ''
     #! ${fhs}
