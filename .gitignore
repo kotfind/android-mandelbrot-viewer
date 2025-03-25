@@ -2,6 +2,7 @@
 .avd
 .gradle
 .gradle-home
+.kotlin
 build
 gradle
 kls_database.db
