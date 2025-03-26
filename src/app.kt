@@ -9,7 +9,11 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun App() {
-    Column(modifier = Modifier.fillMaxSize().padding(5.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(5.dp)
+    ) {
         Text("Hello, world")
     }
 }
