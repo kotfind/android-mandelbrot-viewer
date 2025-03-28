@@ -8,11 +8,17 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import org.kotfind.android_course.App
+
+import android.util.Log
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // XXX: hardcoded rust_jni
+        System.loadLibrary("rust_jni")
+        Log.d("rust", hello("world"))
+
         enableEdgeToEdge()
         setContent {
             Surface(modifier = Modifier.fillMaxSize()) {
@@ -23,4 +29,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    external fun hello(to: String): String
 }

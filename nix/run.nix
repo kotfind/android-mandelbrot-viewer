@@ -5,10 +5,11 @@
   pkgs,
   ...
 }: let
-  inherit (pkgs) writeScriptBin;
+  inherit (builtins) substring stringLength elem;
+  inherit (config) rustComposition;
   inherit (lib) getExe getExe' escapeShellArg;
   inherit (lib.strings) toUpper;
-  inherit (builtins) substring stringLength elem;
+  inherit (pkgs) writeScriptBin;
 
   fullPackageName = with cfg.app; package + "." + flavor;
 
@@ -27,11 +28,13 @@
   echo = getExe' pkgs.toybox "echo";
   head = getExe' pkgs.toybox "head";
   tail = getExe' pkgs.toybox "tail";
+  cp = getExe' pkgs.toybox "cp";
   boxes = getExe pkgs.boxes;
   fhs = getExe config.fhs;
   grep = getExe pkgs.gnugrep;
   id = getExe' pkgs.toybox "id";
   flakeRoot = getExe config.flakeRoot;
+  cargo = getExe' rustComposition.pkg "cargo";
 
   checkGroup = deviceType: let
     groupName =
@@ -101,6 +104,9 @@
     then "${adb} shell monkey -p ${fullPackageName} -c android.intent.category.LAUNCHER 1"
     else "";
 
+  jniLibFromPath = "rust/target/${rustComposition.target}/release/lib${cfg.app.rust-crate}.so";
+  jniLibToDir = "kotlin/jniLibsGenerated/${cfg.versions.abi}/";
+
   genRunScript = {
     # name of generated script
     scriptName,
@@ -120,6 +126,13 @@
       set -o
 
       cd "$(${flakeRoot})"
+
+      pushd rust
+      ${cargo} build --target ${rustComposition.target} --release
+      popd
+
+      mkdir -p ${jniLibToDir}
+      ${cp} ${jniLibFromPath} ${jniLibToDir}
 
       pushd kotlin
       ${checkGroup deviceType}

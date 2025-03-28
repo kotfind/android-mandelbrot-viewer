@@ -14,6 +14,9 @@
           #     https://developer.android.com/build/build-variants#product-flavors
           flavor = "master";
           package = "org.example.app";
+
+          # Should be the same as in rust/Cargo.toml
+          rust-crate = "rust_jni";
         };
 
         system-image-type = "default";

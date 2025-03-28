@@ -4,4 +4,5 @@
 .gradle-home
 .kotlin
 build
+jniLibsGenerated
 kls_database.db

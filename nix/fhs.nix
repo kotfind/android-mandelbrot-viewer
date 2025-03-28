@@ -64,12 +64,14 @@
       {inherit cfg;}
     );
 
+  ndkBinDir = "${ndkDir}/toolchains/llvm/prebuilt/linux-x86_64/bin";
+
   fhs = buildFHSEnv {
     name = "android-development-environment";
 
     targetPkgs = pkgs:
       [
-        rustComposition
+        rustComposition.pkg
         androidsdk
         platform-tools
       ]
@@ -85,6 +87,9 @@
 
       export GRADLE_OPTS="-Dorg.gradle.project.android.aapt2FromMavenOverride=${sdkDir}/build-tools/${cfg.versions.build-tools}/aapt2"
       export GRADLE_USER_HOME=".gradle-home"
+
+      export CARGO_TARGET_${rustComposition.targetForEnv}_LINKER="${ndkBinDir}/${rustComposition.target}${cfg.versions.sdk.compile}-clang"
+      export CARGO_TARGET_${rustComposition.targetForEnv}_AR="${ndkBinDir}/llvm-ar"
 
       ${cfgExport}
     '';

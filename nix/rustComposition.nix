@@ -1,36 +1,39 @@
 {
-  lib,
   fenix,
   system,
+  cfg,
+  lib,
   ...
 }: let
-  inherit (lib.lists) foldl;
+  inherit (lib.strings) toUpper;
+  inherit (builtins) replaceStrings;
 
-  # TODO: check cfg.versions.abi here
-  rustTargets = [
-    "x86_64-linux-android"
-  ];
+  target = let
+    abiToTarget = {
+      "x86_64" = "x86_64-linux-android";
+    };
 
-  rustComposition = with fenix.packages.${system};
+    inherit (cfg.versions) abi;
+  in
+    if abiToTarget ? ${abi}
+    then abiToTarget.${abi}
+    else throw "abi '${abi}' is not supported";
+
+  targetForEnv =
+    replaceStrings
+    ["." "-"]
+    ["_" "_"]
+    (toUpper target);
+
+  pkg = with fenix.packages.${system};
     combine
-    (
-      [
-        stable.cargo
-        stable.rustc
-      ]
-      ++ (
-        foldl
-        (
-          acc: target:
-            acc
-            ++ [
-              targets.${target}.stable.rust-std
-            ]
-        )
-        []
-        rustTargets
-      )
-    );
+    [
+      stable.cargo
+      stable.rustc
+      targets.${target}.stable.rust-std
+    ];
 in {
-  inherit rustComposition;
+  rustComposition = {
+    inherit target pkg targetForEnv;
+  };
 }
