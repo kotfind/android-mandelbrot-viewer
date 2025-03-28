@@ -4,5 +4,4 @@
 .gradle-home
 .kotlin
 build
-gradle
 kls_database.db
