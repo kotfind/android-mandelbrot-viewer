@@ -1,29 +1,39 @@
 {
   pkgs,
   cfg,
+  system,
+  fenix,
 }: let
   imports = [
-    ./composition.nix
+    ./androidComposition.nix
     ./emulator.nix
     ./fhs.nix
     ./pkgs.nix
     ./run.nix
+    ./rustComposition.nix
     ./schema.nix
+    ./util.nix
   ];
 
   lib = pkgs.lib;
 
-  config = lib.fix (
+  inherit (lib) fix getExe;
+  inherit (lib.lists) foldl;
+  inherit (lib.trivial) pipe;
+  inherit (lib.attrsets) recursiveUpdate;
+  inherit (builtins) mapAttrs;
+
+  config = fix (
     config: let
       inputs = {
-        inherit pkgs cfg lib config;
+        inherit pkgs cfg lib config system fenix;
         impl = config.impl;
       };
     in
-      lib.lists.foldl
+      foldl
       (
         acc: file:
-          lib.attrsets.recursiveUpdate
+          recursiveUpdate
           acc
           (import file inputs)
       )
@@ -32,31 +42,21 @@
   );
 
   public = rec {
-    inherit
-      (config)
-      androidComposition
-      shell
-      ;
+    inherit (config) androidComposition shell;
 
     scripts = {
-      inherit
-        (config.scripts)
-        emulator
-        run
-        install
-        assemble
-        ;
+      inherit (config.scripts) emulator run install assemble;
     };
 
     apps =
-      builtins.mapAttrs
+      mapAttrs
       (_: script: {
         type = "app";
-        program = lib.getExe script;
+        program = getExe script;
       })
       scripts;
   };
 
   checks = with config; [schemaCheck pkgsCheck];
 in
-  lib.trivial.pipe public checks
+  pipe public checks

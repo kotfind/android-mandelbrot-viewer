@@ -5,27 +5,33 @@
   pkgs,
   ...
 }: let
+  inherit (pkgs) writeScriptBin;
+  inherit (lib) getExe getExe' escapeShellArg;
+  inherit (lib.strings) toUpper;
+  inherit (builtins) substring stringLength elem;
+
   fullPackageName = with cfg.app; package + "." + flavor;
 
   firstLetterToUpper = str:
-    lib.strings.toUpper (builtins.substring 0 1 str)
-    + builtins.substring 1 ((builtins.stringLength str) - 1) str;
+    toUpper (substring 0 1 str)
+    + substring 1 ((stringLength str) - 1) str;
 
   gradleSubcommand = gradleAction: buildType:
     gradleAction
-    + lib.escapeShellArg (firstLetterToUpper cfg.app.flavor)
-    + lib.escapeShellArg (firstLetterToUpper buildType);
+    + escapeShellArg (firstLetterToUpper cfg.app.flavor)
+    + escapeShellArg (firstLetterToUpper buildType);
 
-  adb = lib.getExe' config.androidComposition.platform-tools "adb";
-  awk = lib.getExe pkgs.gawk;
-  gradle = lib.getExe pkgs.gradle;
-  echo = lib.getExe' pkgs.toybox "echo";
-  head = lib.getExe' pkgs.toybox "head";
-  tail = lib.getExe' pkgs.toybox "tail";
-  boxes = lib.getExe pkgs.boxes;
-  fhs = lib.getExe config.fhs;
-  grep = lib.getExe pkgs.gnugrep;
-  id = lib.getExe' pkgs.toybox "id";
+  adb = getExe' config.androidComposition.platform-tools "adb";
+  awk = getExe pkgs.gawk;
+  gradle = getExe pkgs.gradle;
+  echo = getExe' pkgs.toybox "echo";
+  head = getExe' pkgs.toybox "head";
+  tail = getExe' pkgs.toybox "tail";
+  boxes = getExe pkgs.boxes;
+  fhs = getExe config.fhs;
+  grep = getExe pkgs.gnugrep;
+  id = getExe' pkgs.toybox "id";
+  flakeRoot = getExe config.flakeRoot;
 
   checkGroup = deviceType: let
     groupName =
@@ -36,7 +42,7 @@
       else throw "unreachable";
 
     script =
-      if builtins.elem deviceType ["device" "emulator"]
+      if elem deviceType ["device" "emulator"]
       then
         /*
         bash
@@ -44,7 +50,7 @@
         ''
           if ${id} -nG "$USER" | ${grep} -wq '${groupName}' ; then
             ${boxes} -d parchment <(echo ${
-            lib.escapeShellArg
+            escapeShellArg
             ("WARNING:\n"
               + "Current user is not in a group '${groupName}'.\n"
               + "Did you forget to configure your system?")
@@ -84,7 +90,7 @@
         export ANDROID_SERIAL
 
         if [ -z "$ANDROID_SERIAL" ]; then
-          ${echo} ${lib.escapeShellArg (deviceNotFoundErrorMsg deviceType)}
+          ${echo} ${escapeShellArg (deviceNotFoundErrorMsg deviceType)}
           exit 1
         fi
       ''
@@ -107,21 +113,25 @@
     # "emulator", "device" or "none"
     deviceType ? "emulator",
   }: let
-    script = pkgs.writeScriptBin scriptName ''
+    script = writeScriptBin scriptName ''
       #! ${fhs}
 
       set -euo pipefail
       set -o
 
+      cd "$(${flakeRoot})"
+
+      pushd kotlin
       ${checkGroup deviceType}
       ${setAndroidSerialCmd deviceType}
       ${gradle} ${gradleSubcommand gradleAction buildType}
       ${runCommand doRun}
+      popd
     '';
   in (
-    if !builtins.elem buildType ["debug" "release"]
+    if !elem buildType ["debug" "release"]
     then throw "error: invalid build type"
-    else if !builtins.elem deviceType ["emulator" "device" "none"]
+    else if !elem deviceType ["emulator" "device" "none"]
     then throw "error: invalid device type"
     else script
   );

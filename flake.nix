@@ -1,7 +1,17 @@
 {
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  inputs = {
+    fenix = {
+      url = "github:nix-community/fenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nixpkgs.url = "nixpkgs/nixos-unstable";
+  };
 
-  outputs = {nixpkgs, ...}: let
+  outputs = {
+    nixpkgs,
+    fenix,
+    ...
+  }: let
     system = "x86_64-linux";
     pkgs = import nixpkgs {
       inherit system;
@@ -12,10 +22,6 @@
       };
     };
 
-    # To check available versions use
-    #     sdkmanager --list
-    # or
-    #     just specify random one and check the error message
     cfg = {
       app = {
         # will be passed as a project flavor:
@@ -26,6 +32,10 @@
 
       system-image-type = "default";
 
+      # To check available versions use
+      #     sdkmanager --list
+      # or
+      #     just specify random one and check the error message
       versions = {
         # SDK to Android version mapping:
         #     https://developer.android.com/tools/releases/platforms
@@ -58,7 +68,7 @@
     };
 
     config = import ./nix {
-      inherit pkgs cfg;
+      inherit pkgs cfg fenix system;
     };
   in {
     devShells.${system}.default = config.shell;

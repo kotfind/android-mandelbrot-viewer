@@ -5,7 +5,11 @@
   lib,
   ...
 }: let
-  emulatorPkg = pkgs.androidenv.emulateApp ({
+  inherit (pkgs) writeScriptBin;
+  inherit (pkgs.androidenv) emulateApp;
+  inherit (lib) getExe;
+
+  emulatorPkg = emulateApp ({
       name = "emulator";
 
       androidAvdHome = "./.avd";
@@ -35,16 +39,21 @@
       systemImageType = cfg.system-image-type;
     }));
 
-  fhs = lib.getExe config.fhs;
-  emulator = lib.getExe emulatorPkg;
+  fhs = getExe config.fhs;
+  emulator = getExe emulatorPkg;
+  flakeRoot = getExe config.flakeRoot;
 
-  emulatorScript = pkgs.writeScriptBin "emulator" ''
+  emulatorScript = writeScriptBin "emulator" ''
     #! ${fhs}
 
     set -euo pipefail
     set -x
 
+    cd "$(${flakeRoot})"
+
+    pushd kotlin
     ${emulator}
+    popd
   '';
 in {
   scripts.emulator = emulatorScript;

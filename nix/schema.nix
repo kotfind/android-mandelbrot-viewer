@@ -8,10 +8,6 @@
     nix
     */
     ''
-      # To check available versions use
-      #     sdkmanager --list
-      # or
-      #     just specify random one and check the error message
       {
         app = {
           # will be passed as a project flavor:
@@ -22,6 +18,10 @@
 
         system-image-type = "default";
 
+        # To check available versions use
+        #     sdkmanager --list
+        # or
+        #     just specify random one and check the error message
         versions = {
           # SDK to Android version mapping:
           #     https://developer.android.com/tools/releases/platforms
@@ -54,16 +54,21 @@
       }
     '';
 
-  schemaFile = builtins.toFile "schema-example-file" schemaString;
+  inherit (lib) id;
+  inherit (lib.strings) concatStringsSep;
+  inherit (lib.trivial) pipe;
+  inherit (builtins) toFile map attrNames isString;
+
+  schemaFile = toFile "schema-example-file" schemaString;
 
   schemaExpr = import schemaFile;
 
   # Returns lib.id if values match, throws otherwise
   cmpToSchema = cfg: schema: path: let
-    keyPathString = key: lib.strings.concatStringsSep "." (path ++ [key]);
+    keyPathString = key: concatStringsSep "." (path ++ [key]);
 
     schemaKeysCheck =
-      builtins.map (
+      map (
         key:
           if cfg ? ${key}
           then cmpToSchema cfg.${key} schema.${key} (path ++ [key])
@@ -73,28 +78,28 @@
               + "` is not defined in `cfg`\n"
               + "check the schema example file: ${schemaFile}")
       )
-      (builtins.attrNames schema);
+      (attrNames schema);
 
     cfgKeysCheck =
-      builtins.map (
+      map (
         key:
           if schema ? ${key}
-          then lib.id
+          then id
           else
             throw ("error: option `"
               + (keyPathString key)
               + "` is defined in `cfg`, but is not used in schema\n"
               + "check the schema example file: ${schemaFile}")
       )
-      (builtins.attrNames cfg);
+      (attrNames cfg);
 
     result =
-      if builtins.isString cfg
+      if isString cfg
       then
-        if builtins.isString schema
-        then lib.id
+        if isString schema
+        then id
         else throw "${keyPathString} is not a string"
-      else lib.trivial.pipe lib.id (schemaKeysCheck ++ cfgKeysCheck);
+      else pipe id (schemaKeysCheck ++ cfgKeysCheck);
   in
     result;
 in {
