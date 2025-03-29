@@ -159,9 +159,11 @@ fun AppBody(
 ) {
     var evalTime by remember { mutableStateOf<Duration>(Duration.ZERO) }
 
+    var mandelbrotGeneratorCoroutine: Job? = null
     val scope = rememberCoroutineScope()
     LaunchedEffect(mandelbrotGenerator) {
-        scope.launch {
+        mandelbrotGeneratorCoroutine?.cancel()
+        mandelbrotGeneratorCoroutine = scope.launch {
             onBitmapChanged(null)
             evalTime = measureTime {
                 onBitmapChanged(mandelbrotGenerator.genBitmap())
