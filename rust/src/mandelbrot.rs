@@ -1,9 +1,10 @@
 use crate::log;
-use itertools::iproduct;
+use itertools::{Itertools, iproduct};
 use jni::{
     JNIEnv,
     objects::{JIntArray, JObject},
 };
+use rayon::prelude::*;
 
 type Complex = num::complex::Complex<f64>;
 type Color = i32;
@@ -49,9 +50,15 @@ impl RustMandelbrotGenerator {
     }
 
     pub fn gen_pixels(&self) -> Vec<Color> {
-        iproduct!(0..self.bitmap_size, 0..self.bitmap_size)
+        let sz = self.bitmap_size;
+        let coords = iproduct!(0..sz, 0..sz).collect_vec();
+
+        // Note: saving coords to array, as using `par_bridge()` won't
+        // work for whatever reason.
+        coords
+            .par_iter()
             .map(|(y, x)| {
-                let c = self.x_y_to_complex((x as f64, y as f64));
+                let c = self.x_y_to_complex((*x as f64, *y as f64));
                 let iters = self.get_point_iters(c);
                 let color = self.iters_to_color(iters);
                 color

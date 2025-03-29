@@ -11,3 +11,4 @@ hsv = "0.1.1"
 itertools = "0.14.0"
 jni = { version = "0.21.1", default-features = false }
 num = "0.4.3"
+rayon = "1.10.0"
