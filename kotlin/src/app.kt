@@ -11,6 +11,8 @@ import android.graphics.Bitmap
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.ui.platform.LocalContext
+import kotlin.time.Duration
+import kotlin.time.measureTime
 import kotlinx.coroutines.*
 
 @Composable
@@ -132,11 +134,15 @@ fun AppBody(
     onMandelbrotGeneratorChanged: (MandelbrotGenerator) -> Unit,
 
 ) {
+    var evalTime by remember { mutableStateOf<Duration>(Duration.ZERO) }
+
     val scope = rememberCoroutineScope()
     LaunchedEffect(mandelbrotGenerator) {
         scope.launch {
             onBitmapChanged(null)
-            onBitmapChanged(mandelbrotGenerator.genBitmap())
+            evalTime = measureTime {
+                onBitmapChanged(mandelbrotGenerator.genBitmap())
+            }
         }
     }
 
@@ -146,6 +152,7 @@ fun AppBody(
                 mandelbrotBitmap = bitmap,
                 mandelbrotGenerator = mandelbrotGenerator,
                 onMandelbrotGeneratorChanged = onMandelbrotGeneratorChanged,
+                evalTime = evalTime,
             )
         }
         is Screen.Settings -> {

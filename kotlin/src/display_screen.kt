@@ -8,17 +8,19 @@ import androidx.compose.ui.*
 import androidx.compose.ui.unit.dp
 
 import android.graphics.Bitmap
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntSize
+import kotlin.time.Duration
 
 @Composable
 fun DisplayScreen(
     mandelbrotBitmap: Bitmap?,
     mandelbrotGenerator: MandelbrotGenerator,
     onMandelbrotGeneratorChanged: (MandelbrotGenerator) -> Unit,
+    evalTime: Duration,
 ) {
     if (mandelbrotBitmap == null) {
         Text(
@@ -32,9 +34,7 @@ fun DisplayScreen(
 
     val imageSize by remember { mutableStateOf(IntSize(100, 100)) }
 
-    Image(
-        bitmap = mandelbrotBitmap.asImageBitmap(),
-        contentDescription = "Mandelbrot Set",
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .transformable(rememberTransformableState { deltaZoom, deltaOffset, _deltaRotation ->
@@ -44,5 +44,18 @@ fun DisplayScreen(
                 gen.centerY -= deltaOffset.y * gen.range / imageSize.height
                 onMandelbrotGeneratorChanged(gen)
             })
-    )
+    ) {
+        Image(
+            bitmap = mandelbrotBitmap.asImageBitmap(),
+            contentDescription = "Mandelbrot Set",
+            modifier = Modifier.fillMaxSize(),
+        )
+
+        Text(
+            text = "Eval Time: ${evalTime.inWholeMilliseconds} ms",
+            modifier = Modifier
+                .padding(bottom = 5.dp)
+                .align(Alignment.BottomCenter),
+        )
+    }
 }
