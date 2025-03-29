@@ -1,4 +1,4 @@
-package org.kotfind.android_course
+package org.kotfind.mandelbrot_viewer
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.*
@@ -7,11 +7,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.dp
 
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.Bitmap
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.ui.platform.LocalContext
@@ -71,7 +73,20 @@ fun AppTopBar(
     val context = LocalContext.current
     
     TopAppBar(
-        title = { NameCard() },
+        title = {
+            Column {
+                Text(
+                    text = "Mandelbrot Viewer",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    text = "by kotfind",
+                    color = MaterialTheme.colorScheme.secondary,
+                    style = MaterialTheme.typography.titleSmall,
+                )
+            }
+        },
         actions = {
             IconButton(onClick = { expanded = true }) {
                 Icon(Icons.Default.MoreVert, contentDescription = "Options")
@@ -83,14 +98,15 @@ fun AppTopBar(
                 DropdownMenuItem(
                     text = { Text("Settings") },
                     onClick = {
-                        onScreenChanged(Screen.Settings)
                         expanded = false
+                        onScreenChanged(Screen.Settings)
                     }
                 )
 
                 DropdownMenuItem(
                     text = { Text("Save") },
                     onClick = {
+                        expanded = false
                         if (bitmap != null) {
                             writeBitmapToGallery(
                                 context = context,
@@ -101,7 +117,6 @@ fun AppTopBar(
                         } else {
                             Toast.makeText(context, "Image is loading.\nCannot save.", Toast.LENGTH_SHORT).show()
                         }
-                        expanded = false
                     }
                 )
 
@@ -110,20 +125,25 @@ fun AppTopBar(
                 DropdownMenuItem(
                     text = { Text("Reset Transform") },
                     onClick = {
+                        expanded = false
+
                         val gen = MandelbrotGenerator.clone(mandelbrotGenerator)
                         gen.centerX = 0.0
                         gen.centerY = 0.0
                         gen.range = 3.0
+
+                        onScreenChanged(Screen.Display)
                         onMandelbrotGeneratorChanged(gen)
-                        expanded = false
                     }
                 )
 
                 DropdownMenuItem(
                     text = { Text("Reset All") },
                     onClick = {
-                        onMandelbrotGeneratorChanged(RustMandelbrotGenerator())
                         expanded = false
+
+                        onScreenChanged(Screen.Display)
+                        onMandelbrotGeneratorChanged(RustMandelbrotGenerator())
                     }
                 )
 
@@ -132,6 +152,8 @@ fun AppTopBar(
                 DropdownMenuItem(
                     text = { Text("Export Settings") },
                     onClick = {
+                        expanded = false
+
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         val clip = ClipData.newPlainText(
                             "mandelbrot options",
@@ -139,7 +161,6 @@ fun AppTopBar(
                         )
                         clipboard.setPrimaryClip(clip)
                         Toast.makeText(context, "Copied settings to clipboard.", Toast.LENGTH_SHORT).show()
-                        expanded = false
                     },
                 )
 
@@ -221,6 +242,7 @@ fun AppTopBar(
                             }
                         }
 
+                        onScreenChanged(Screen.Display)
                         onMandelbrotGeneratorChanged(gen)
                         
                         Toast.makeText(
@@ -259,6 +281,11 @@ fun AppBody(
         }
     }
 
+    BackPressHandler(
+        screen = screen,
+        onScreenChanged = onScreenChanged
+    )
+
     when (screen) {
         is Screen.Display -> {
             DisplayScreen(
@@ -276,6 +303,28 @@ fun AppBody(
                     onScreenChanged(Screen.Display)
                 },
             )
+        }
+    }
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BackPressHandler(
+    screen: Screen,
+    onScreenChanged: (Screen) -> Unit,
+) {
+    val activity = LocalContext.current as Activity
+
+    BackHandler(enabled = true) {
+        when (screen) {
+            is Screen.Display -> {
+                activity.finish()
+            }
+
+            is Screen.Settings -> {
+                onScreenChanged(Screen.Display)
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-package org.kotfind.android_course
+package org.kotfind.mandelbrot_viewer
 
 import android.graphics.Bitmap
 import android.graphics.Color

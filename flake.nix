@@ -26,8 +26,8 @@
       app = {
         # will be passed as a project flavor:
         #     https://developer.android.com/build/build-variants#product-flavors
-        flavor = "rust_jni";
-        package = "org.kotfind.android_course";
+        flavor = "master";
+        package = "org.kotfind.mandelbrot_viewer";
 
         # Should be the same as in rust/Cargo.toml
         rust-crate = "rust_jni";

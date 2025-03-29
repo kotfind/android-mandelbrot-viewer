@@ -1,4 +1,4 @@
-package org.kotfind.android_course
+package org.kotfind.mandelbrot_viewer
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.*

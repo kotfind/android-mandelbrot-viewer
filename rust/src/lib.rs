@@ -10,7 +10,7 @@ use mandelbrot::RustMandelbrotGenerator;
 mod mandelbrot;
 
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn Java_org_kotfind_android_1course_RustMandelbrotGenerator_genPixels<
+pub unsafe extern "C" fn Java_org_kotfind_mandelbrot_1viewer_RustMandelbrotGenerator_genPixels<
     'local,
 >(
     mut env: JNIEnv<'local>,
