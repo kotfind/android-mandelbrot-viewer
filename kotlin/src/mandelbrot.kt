@@ -27,6 +27,16 @@ abstract class MandelbrotGenerator {
         return bitmap
     }
 
+    fun toOptionsString(): String {
+        return "" +
+            "type=${getType()}\n" +
+            "centerX=${centerX}\n" +
+            "centerY=${centerY}\n" +
+            "range=${range}\n" +
+            "bitmapSize=${bitmapSize}\n" +
+            "maxIter=${maxIter}\n"
+    }
+
     companion object {
         fun fromType(type: String): MandelbrotGenerator {
             return when (type) {

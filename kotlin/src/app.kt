@@ -7,6 +7,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.dp
 
+import android.content.ClipboardManager
+import android.content.ClipData
+import android.content.Context
 import android.graphics.Bitmap
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -118,6 +121,21 @@ fun AppTopBar(
                         onMandelbrotGeneratorChanged(RustMandelbrotGenerator())
                         expanded = false
                     }
+                )
+
+                HorizontalDivider()
+
+                DropdownMenuItem(
+                    text = { Text("Copy Settings") },
+                    onClick = {
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip = ClipData.newPlainText(
+                            "mandelbrot options",
+                            mandelbrotGenerator.toOptionsString()
+                        )
+                        clipboard.setPrimaryClip(clip)
+                        expanded = false
+                    },
                 )
             }
         },
