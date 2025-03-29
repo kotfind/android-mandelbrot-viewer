@@ -130,7 +130,7 @@ fun AppTopBar(
                 HorizontalDivider()
 
                 DropdownMenuItem(
-                    text = { Text("Copy Settings") },
+                    text = { Text("Export Settings") },
                     onClick = {
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         val clip = ClipData.newPlainText(
@@ -140,6 +140,94 @@ fun AppTopBar(
                         clipboard.setPrimaryClip(clip)
                         Toast.makeText(context, "Copied settings to clipboard.", Toast.LENGTH_SHORT).show()
                         expanded = false
+                    },
+                )
+
+                DropdownMenuItem(
+                    text = { Text("Import Settings") },
+                    onClick = {
+                        expanded = false
+
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val text = clipboard.primaryClip?.getItemAt(0)?.coerceToText(context)
+                        if (text == null) {
+                            Toast.makeText(
+                                context,
+                                "Failed to read text from clipboard.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            return@DropdownMenuItem
+                        }
+
+                        val gen = MandelbrotGenerator.clone(mandelbrotGenerator)
+
+                        val optionRegex = Regex("""^\s*(\w+)\s*=\s*(.*)\s*$""", RegexOption.DOT_MATCHES_ALL)
+
+                        val matchedOptions = mutableSetOf<String>()
+
+                        for (line in text.lines()) {
+                            val matchRes = optionRegex.matchEntire(line)
+                            if (matchRes == null) {
+                                continue
+                            }
+
+                            val optionName = matchRes.groupValues[1]
+                            val optionValue = matchRes.groupValues[2]
+
+                            when (optionName) {
+                                "centerX" -> {
+                                    val v =  optionValue.toDoubleOrNull()
+                                    if (v != null) {
+                                        matchedOptions.add(optionName)
+                                        gen.centerX = v
+                                    }
+                                }
+
+                                "centerY" -> {
+                                    val v =  optionValue.toDoubleOrNull()
+                                    if (v != null) {
+                                        matchedOptions.add(optionName)
+                                        gen.centerY = v
+                                    }
+                                }
+
+                                "range" -> {
+                                    val v =  optionValue.toDoubleOrNull()
+                                    if (v != null && v > 0) {
+                                        matchedOptions.add(optionName)
+                                        gen.range = v
+                                    }
+                                }
+
+                                "bitmapSize" -> {
+                                    val v = optionValue.toIntOrNull()
+                                    if (v != null && v >= 1) {
+                                        matchedOptions.add(optionName)
+                                        gen.bitmapSize = v
+                                    }
+                                }
+
+                                "maxIter" -> {
+                                    val v = optionValue.toIntOrNull()
+                                    if (v != null && v >= 1) {
+                                        matchedOptions.add(optionName)
+                                        gen.maxIter = v
+                                    }
+                                }
+
+                                else -> {}
+
+                                // NOTE: 'type' is ignored
+                            }
+                        }
+
+                        onMandelbrotGeneratorChanged(gen)
+                        
+                        Toast.makeText(
+                            context,
+                            "Imported options: ${matchedOptions.joinToString(", ")}",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     },
                 )
             }

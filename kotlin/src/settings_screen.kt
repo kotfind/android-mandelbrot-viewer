@@ -74,7 +74,7 @@ fun SettingsScreen(
                 placeholder = { Text("3.0") },
                 value = range.toString(),
                 onValueChange = { range = it },
-                isError = range.toDoubleOrNull() == null,
+                isError = !checkRange(range),
                 singleLine = false,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number
@@ -173,7 +173,7 @@ fun SettingsScreen(
             enabled = true &&
                 centerX.toDoubleOrNull() != null &&
                 centerY.toDoubleOrNull() != null &&
-                range.toDoubleOrNull() != null &&
+                checkRange(range) &&
                 checkBitmapSize(bitmapSize) &&
                 checkMaxIter(maxIter),
 
@@ -192,4 +192,9 @@ private fun checkBitmapSize(bitmapSize: String): Boolean {
 private fun checkMaxIter(maxIter: String): Boolean {
     val v = maxIter.toIntOrNull()
     return v != null && v >= 1
+}
+
+private fun checkRange(range: String): Boolean {
+    val v = range.toDoubleOrNull()
+    return v != null && v > 0
 }
