@@ -1,3 +1,9 @@
+# Setup
+
+- Set the right value for `cfg.versions.abi` in `flake.nix` file
+
+    It's usually `x86_64` for emulator and `arm64` for physical device.
+
 # Commands
 
 - Run app on physical device, connected via USB.
