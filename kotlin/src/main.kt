@@ -15,12 +15,7 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-            Surface(modifier = Modifier.fillMaxSize()) {
-                Column(modifier = Modifier.safeDrawingPadding()) {
-                    NameCard()
-                    App()
-                }
-            }
+            CompleteApp()
         }
     }
 }

@@ -5,14 +5,14 @@ import android.graphics.Color
 import kotlin.math.sqrt
 
 abstract class MandelbrotGenerator {
-    var centerX: Double = 0.0
-    var centerY: Double = 0.0
+    var centerX = 0.0
+    var centerY = 0.0
+    var range = 3.0
+    var bitmapSize = 512
+    var maxIter = 100
 
-    var range: Double = 3.0
-
-    var bitmapSize: Int = 512
-
-    var maxIter: Int = 100
+    abstract fun getType(): String
+    protected abstract fun genPixels(): IntArray
 
     final fun genBitmap(): Bitmap {
         val pixels = genPixels()
@@ -25,8 +25,6 @@ abstract class MandelbrotGenerator {
         bitmap.setPixels(pixels, 0, bitmapSize, 0, 0, bitmapSize, bitmapSize)
         return bitmap
     }
-
-    protected abstract fun genPixels(): IntArray
 }
 
 class RustMandelbrotGenerator : MandelbrotGenerator() {
@@ -37,10 +35,18 @@ class RustMandelbrotGenerator : MandelbrotGenerator() {
         }
     }
 
+    override fun getType(): String {
+        return "rust"
+    }
+
     override external fun genPixels(): IntArray
 }
 
 class KotlinMandelbrotGenerator : MandelbrotGenerator() {
+    override fun getType(): String {
+        return "kotlin"
+    }
+
     override fun genPixels(): IntArray {
         val pixels = IntArray(bitmapSize * bitmapSize)
 

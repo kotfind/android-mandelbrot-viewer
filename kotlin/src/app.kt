@@ -8,11 +8,71 @@ import androidx.compose.ui.*
 import androidx.compose.ui.unit.dp
 
 import android.graphics.Bitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import kotlinx.coroutines.*
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+
 @Composable
-fun App() {
+fun CompleteApp() {
+    var screen by remember { mutableStateOf<Screen>(Screen.Display) }
+
+    Scaffold(
+        modifier = Modifier.safeDrawingPadding(),
+        topBar = {
+            AppTopBar(
+                onScreenChanged = { screen = it },
+                screen = screen,
+            )
+        }
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(it)
+                .fillMaxSize()
+        ) {
+            AppBody(
+                screen = screen,
+                onScreenChanged = { screen = it },
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppTopBar(
+    screen: Screen,
+    onScreenChanged: (Screen) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    
+    TopAppBar(
+        title = { NameCard() },
+        actions = {
+            IconButton(onClick = { expanded = true }) {
+                Icon(Icons.Default.MoreVert, contentDescription = "Options")
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Settings") },
+                    onClick = {
+                        onScreenChanged(Screen.Settings)
+                    }
+                )
+            }
+        },
+    ) 
+}
+
+@Composable
+fun AppBody(
+    screen: Screen,
+    onScreenChanged: (Screen) -> Unit,
+) {
     var mandelbrotGenerator by remember {
         mutableStateOf<MandelbrotGenerator>(RustMandelbrotGenerator())
     }
@@ -22,24 +82,30 @@ fun App() {
     }
 
     val scope = rememberCoroutineScope()
-
-    LaunchedEffect(Unit) {
+    LaunchedEffect(mandelbrotGenerator) {
         scope.launch {
+            mandelbrotBitmap = null
             mandelbrotBitmap = mandelbrotGenerator.genBitmap()
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(5.dp)
-    ) {
-        if (mandelbrotBitmap != null) {
-            Image(
-                bitmap = mandelbrotBitmap!!.asImageBitmap(),
-                contentDescription = "Mandelbrot Set",
-                modifier = Modifier.fillMaxSize()
+    when (screen) {
+        is Screen.Display -> {
+            DisplayScreen(mandelbrotBitmap)
+        }
+        is Screen.Settings -> {
+            SettingsScreen(
+                generator = mandelbrotGenerator,
+                onMandelbrotGeneratorChanged = {
+                    mandelbrotGenerator = it
+                    onScreenChanged(Screen.Display)
+                },
             )
         }
     }
+}
+
+sealed class Screen {
+    object Display : Screen()
+    object Settings : Screen()
 }
