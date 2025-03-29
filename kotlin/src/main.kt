@@ -9,15 +9,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 
-import android.util.Log
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // XXX: hardcoded rust_jni
+        // XXX: hardcoded "rust_jni"
         System.loadLibrary("rust_jni")
-        Log.d("rust", hello("world"))
 
         enableEdgeToEdge()
         setContent {
@@ -29,6 +26,4 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-    external fun hello(to: String): String
 }

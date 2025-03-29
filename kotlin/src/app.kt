@@ -7,13 +7,39 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.dp
 
+import android.graphics.Bitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import kotlinx.coroutines.*
+
 @Composable
 fun App() {
+    var mandelbrotGenerator by remember {
+        mutableStateOf<MandelbrotGenerator>(KotlinMandelbrotGenerator())
+    }
+
+    var mandelbrotBitmap by remember {
+        mutableStateOf<Bitmap?>(null)
+    }
+
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        scope.launch {
+            mandelbrotBitmap = mandelbrotGenerator.genBitmap()
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(5.dp)
     ) {
-        Text("Hello, world")
+        if (mandelbrotBitmap != null) {
+            Image(
+                bitmap = mandelbrotBitmap!!.asImageBitmap(),
+                contentDescription = "Mandelbrot Set",
+                modifier = Modifier.fillMaxSize()
+            )
+        }
     }
 }

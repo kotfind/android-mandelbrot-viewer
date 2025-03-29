@@ -21,6 +21,10 @@ dependencies {
             implementation(ui.graphics)
             implementation(material3)
         }
+
+        with (kotlinx) {
+            implementation(coroutines)
+        }
     }
 }
 
