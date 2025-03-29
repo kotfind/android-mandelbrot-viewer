@@ -8,14 +8,16 @@ import androidx.compose.ui.*
 import androidx.compose.ui.unit.dp
 
 import android.graphics.Bitmap
-import kotlinx.coroutines.*
-
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.*
 
 @Composable
 fun CompleteApp() {
     var screen by remember { mutableStateOf<Screen>(Screen.Display) }
+
+    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     Scaffold(
         modifier = Modifier.safeDrawingPadding(),
@@ -23,6 +25,7 @@ fun CompleteApp() {
             AppTopBar(
                 onScreenChanged = { screen = it },
                 screen = screen,
+                bitmap = bitmap,
             )
         }
     ) {
@@ -34,6 +37,8 @@ fun CompleteApp() {
             AppBody(
                 screen = screen,
                 onScreenChanged = { screen = it },
+                bitmap = bitmap,
+                onBitmapChanged = { bitmap = it },
             )
         }
     }
@@ -44,8 +49,10 @@ fun CompleteApp() {
 fun AppTopBar(
     screen: Screen,
     onScreenChanged: (Screen) -> Unit,
+    bitmap: Bitmap?,
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     
     TopAppBar(
         title = { NameCard() },
@@ -61,6 +68,21 @@ fun AppTopBar(
                     text = { Text("Settings") },
                     onClick = {
                         onScreenChanged(Screen.Settings)
+                        expanded = false
+                    }
+                )
+
+                DropdownMenuItem(
+                    text = { Text("Save") },
+                    onClick = {
+                        if (bitmap != null) {
+                            writeBitmapToGallery(
+                                context = context,
+                                bitmap = bitmap,
+                                fileName = "mandelbrot",
+                            )
+                        }
+                        expanded = false
                     }
                 )
             }
@@ -72,26 +94,24 @@ fun AppTopBar(
 fun AppBody(
     screen: Screen,
     onScreenChanged: (Screen) -> Unit,
+    bitmap: Bitmap?,
+    onBitmapChanged: (Bitmap?) -> Unit
 ) {
     var mandelbrotGenerator by remember {
         mutableStateOf<MandelbrotGenerator>(RustMandelbrotGenerator())
     }
 
-    var mandelbrotBitmap by remember {
-        mutableStateOf<Bitmap?>(null)
-    }
-
     val scope = rememberCoroutineScope()
     LaunchedEffect(mandelbrotGenerator) {
         scope.launch {
-            mandelbrotBitmap = null
-            mandelbrotBitmap = mandelbrotGenerator.genBitmap()
+            onBitmapChanged(null)
+            onBitmapChanged(mandelbrotGenerator.genBitmap())
         }
     }
 
     when (screen) {
         is Screen.Display -> {
-            DisplayScreen(mandelbrotBitmap)
+            DisplayScreen(bitmap)
         }
         is Screen.Settings -> {
             SettingsScreen(
