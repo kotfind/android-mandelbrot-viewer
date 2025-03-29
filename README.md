@@ -9,6 +9,12 @@ The interface is written with Jetpack Compose (Kotlin), and the Mandelbrot Set
 calculations are performed with either Kotlin or Rust (the backend can be
 choosen in a runtime).
 
+## Demos
+
+![Backends](./backends.gif)
+
+![Demo](./demo.gif)
+
 ## Development
 
 ### Setup
