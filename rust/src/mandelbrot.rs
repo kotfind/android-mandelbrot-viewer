@@ -79,7 +79,7 @@ impl RustMandelbrotGenerator {
     }
 
     fn iters_to_color(&self, iters: usize) -> Color {
-        let hue = 360.0 * iters as f64 / self.max_iter as f64;
+        let hue = (iters as f64 * 360.0 / 100.0) % 360.0;
         let (r, b, g) = hsv::hsv_to_rgb(360.0 - hue, 1.0, 1.0);
         let a = 0xffu32;
 

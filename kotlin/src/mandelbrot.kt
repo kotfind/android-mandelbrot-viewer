@@ -89,7 +89,7 @@ class KotlinMandelbrotGenerator : MandelbrotGenerator() {
                 val mathY = y.toDouble() / bitmapSize * range - range / 2.0 + centerY
                 val c = Complex(mathX, mathY)
 
-                val hue = 360.0 * getPointIters(c) / maxIter
+                val hue = (getPointIters(c) * 360.0 / 100.0) % 360.0
                 pixels[idx] = Color.HSVToColor(floatArrayOf(hue.toFloat(), 1f, 1f))
             }
         }
