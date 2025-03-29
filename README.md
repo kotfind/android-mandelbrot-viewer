@@ -1,10 +1,23 @@
-# Setup
+# Android Mandelbrot Viewer
 
-- Set the right value for `cfg.versions.abi` in `flake.nix` file
+## About
 
-    It's usually `x86_64` for emulator and `arm64` for physical device.
+This application demonstrates how to embed rust code into kotlin android
+application via JNI.
 
-# Commands
+The interface is written with Jetpack Compose (Kotlin), and the Mandelbrot Set
+calculations are performed with either Kotlin or Rust (the backend can be
+choosen in a runtime).
+
+## Development
+
+### Setup
+
+- Set the right value for `cfg.versions.abi` in `flake.nix` file.
+
+    It's usually `x86_64` for emulator and `arm64-v8a` for physical device.
+
+### Commands
 
 - Run app on physical device, connected via USB.
 
@@ -37,7 +50,7 @@
     nix development -c fish
     ```
 
-# Troubleshooting
+### Troubleshooting
 
 - `nix run .#install` does not see a device
 
