@@ -19,6 +19,10 @@ fun CompleteApp() {
 
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
 
+    var mandelbrotGenerator by remember {
+        mutableStateOf<MandelbrotGenerator>(RustMandelbrotGenerator())
+    }
+
     Scaffold(
         modifier = Modifier.safeDrawingPadding(),
         topBar = {
@@ -26,6 +30,8 @@ fun CompleteApp() {
                 onScreenChanged = { screen = it },
                 screen = screen,
                 bitmap = bitmap,
+                mandelbrotGenerator = mandelbrotGenerator,
+                onMandelbrotGeneratorChanged = { mandelbrotGenerator = it },
             )
         }
     ) {
@@ -39,6 +45,8 @@ fun CompleteApp() {
                 onScreenChanged = { screen = it },
                 bitmap = bitmap,
                 onBitmapChanged = { bitmap = it },
+                mandelbrotGenerator = mandelbrotGenerator,
+                onMandelbrotGeneratorChanged = { mandelbrotGenerator = it },
             )
         }
     }
@@ -50,6 +58,8 @@ fun AppTopBar(
     screen: Screen,
     onScreenChanged: (Screen) -> Unit,
     bitmap: Bitmap?,
+    mandelbrotGenerator: MandelbrotGenerator,
+    onMandelbrotGeneratorChanged: (MandelbrotGenerator) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -85,6 +95,28 @@ fun AppTopBar(
                         expanded = false
                     }
                 )
+
+                HorizontalDivider()
+
+                DropdownMenuItem(
+                    text = { Text("Reset Transform") },
+                    onClick = {
+                        val gen = MandelbrotGenerator.clone(mandelbrotGenerator)
+                        gen.centerX = 0.0
+                        gen.centerY = 0.0
+                        gen.range = 3.0
+                        onMandelbrotGeneratorChanged(gen)
+                        expanded = false
+                    }
+                )
+
+                DropdownMenuItem(
+                    text = { Text("Reset All") },
+                    onClick = {
+                        onMandelbrotGeneratorChanged(RustMandelbrotGenerator())
+                        expanded = false
+                    }
+                )
             }
         },
     ) 
@@ -95,12 +127,11 @@ fun AppBody(
     screen: Screen,
     onScreenChanged: (Screen) -> Unit,
     bitmap: Bitmap?,
-    onBitmapChanged: (Bitmap?) -> Unit
-) {
-    var mandelbrotGenerator by remember {
-        mutableStateOf<MandelbrotGenerator>(RustMandelbrotGenerator())
-    }
+    onBitmapChanged: (Bitmap?) -> Unit,
+    mandelbrotGenerator: MandelbrotGenerator,
+    onMandelbrotGeneratorChanged: (MandelbrotGenerator) -> Unit,
 
+) {
     val scope = rememberCoroutineScope()
     LaunchedEffect(mandelbrotGenerator) {
         scope.launch {
@@ -114,14 +145,14 @@ fun AppBody(
             DisplayScreen(
                 mandelbrotBitmap = bitmap,
                 mandelbrotGenerator = mandelbrotGenerator,
-                onMandelbrotGeneratorChanged = { mandelbrotGenerator = it },
+                onMandelbrotGeneratorChanged = onMandelbrotGeneratorChanged,
             )
         }
         is Screen.Settings -> {
             SettingsScreen(
                 generator = mandelbrotGenerator,
                 onMandelbrotGeneratorChanged = {
-                    mandelbrotGenerator = it
+                    onMandelbrotGeneratorChanged(it)
                     onScreenChanged(Screen.Display)
                 },
             )
