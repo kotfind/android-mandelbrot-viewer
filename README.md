@@ -11,9 +11,24 @@ choosen in a runtime).
 
 ## Demos
 
-![Backends](./backends.gif)
-
-![Demo](./demo.gif)
+<table>
+    <tr>
+        <td>
+            Demo:
+        </td>
+        <td>
+            Backends:
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <img src="./demo.gif" height="500px" />
+        </td>
+        <td>
+            <img src="./backends.gif" height="500px" />
+        </td>
+    </tr>
+</table>
 
 ## Development
 
