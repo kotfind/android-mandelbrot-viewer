@@ -7,10 +7,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.dp
 
-import android.content.ClipboardManager
 import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.Bitmap
+import android.widget.Toast
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.ui.platform.LocalContext
@@ -96,6 +97,9 @@ fun AppTopBar(
                                 bitmap = bitmap,
                                 fileName = "mandelbrot",
                             )
+                            Toast.makeText(context, "Saved to gallery", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(context, "Image is loading.\nCannot save.", Toast.LENGTH_SHORT).show()
                         }
                         expanded = false
                     }
@@ -134,6 +138,7 @@ fun AppTopBar(
                             mandelbrotGenerator.toOptionsString()
                         )
                         clipboard.setPrimaryClip(clip)
+                        Toast.makeText(context, "Copied settings to clipboard.", Toast.LENGTH_SHORT).show()
                         expanded = false
                     },
                 )
