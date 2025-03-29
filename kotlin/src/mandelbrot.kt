@@ -8,7 +8,7 @@ abstract class MandelbrotGenerator {
     var centerX: Double = 0.0
     var centerY: Double = 0.0
 
-    var range: Double = 1.0
+    var range: Double = 3.0
 
     var bitmapSize: Int = 512
 
