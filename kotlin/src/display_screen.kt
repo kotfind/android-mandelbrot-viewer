@@ -11,8 +11,10 @@ import android.graphics.Bitmap
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
+import kotlin.math.min
 import kotlin.time.Duration
 
 @Composable
@@ -32,7 +34,7 @@ fun DisplayScreen(
         return
     }
 
-    val imageSize by remember { mutableStateOf(IntSize(100, 100)) }
+    var imageSize by remember { mutableStateOf(IntSize(100, 100)) }
 
     Box(
         modifier = Modifier
@@ -40,15 +42,20 @@ fun DisplayScreen(
             .transformable(rememberTransformableState { deltaZoom, deltaOffset, _deltaRotation ->
                 val gen = MandelbrotGenerator.clone(mandelbrotGenerator)
                 gen.range /= deltaZoom
-                gen.centerX -= deltaOffset.x * gen.range / imageSize.width
-                gen.centerY -= deltaOffset.y * gen.range / imageSize.height
+
+                val scale = gen.range / min(imageSize.width, imageSize.height)
+                gen.centerX -= deltaOffset.x * scale
+                gen.centerY -= deltaOffset.y * scale
+
                 onMandelbrotGeneratorChanged(gen)
             })
     ) {
         Image(
             bitmap = mandelbrotBitmap.asImageBitmap(),
             contentDescription = "Mandelbrot Set",
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .onSizeChanged { imageSize = it },
         )
 
         Text(
