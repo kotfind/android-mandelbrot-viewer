@@ -111,7 +111,11 @@ fun AppBody(
 
     when (screen) {
         is Screen.Display -> {
-            DisplayScreen(bitmap)
+            DisplayScreen(
+                mandelbrotBitmap = bitmap,
+                mandelbrotGenerator = mandelbrotGenerator,
+                onMandelbrotGeneratorChanged = { mandelbrotGenerator = it },
+            )
         }
         is Screen.Settings -> {
             SettingsScreen(

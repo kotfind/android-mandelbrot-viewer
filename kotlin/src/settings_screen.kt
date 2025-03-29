@@ -177,18 +177,12 @@ fun SettingsScreen(
 
         Button(
             onClick = {
-                val gen = when (generatorType) {
-                    "kotlin" -> KotlinMandelbrotGenerator()
-                    "rust" -> RustMandelbrotGenerator()
-                    else -> throw IllegalStateException("Unknown generator type '${generatorType}'")
-                }
-
+                val gen = MandelbrotGenerator.fromType(generatorType)
                 gen.centerX = centerX
                 gen.centerY = centerY
                 gen.range = range
                 gen.bitmapSize = bitmapSize
                 gen.maxIter = maxIter
-
                 onMandelbrotGeneratorChanged(gen)
             },
             modifier = Modifier.padding(5.dp)

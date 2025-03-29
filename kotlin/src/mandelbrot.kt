@@ -12,6 +12,7 @@ abstract class MandelbrotGenerator {
     var maxIter = 100
 
     abstract fun getType(): String
+
     protected abstract fun genPixels(): IntArray
 
     final fun genBitmap(): Bitmap {
@@ -24,6 +25,16 @@ abstract class MandelbrotGenerator {
         var bitmap = Bitmap.createBitmap(bitmapSize, bitmapSize, Bitmap.Config.ARGB_8888)
         bitmap.setPixels(pixels, 0, bitmapSize, 0, 0, bitmapSize, bitmapSize)
         return bitmap
+    }
+
+    companion object {
+        fun fromType(type: String): MandelbrotGenerator {
+            return when (type) {
+                "kotlin" -> KotlinMandelbrotGenerator()
+                "rust" -> RustMandelbrotGenerator()
+                else -> throw IllegalArgumentException("Unknown generator type: $type")
+            }
+        }
     }
 }
 
