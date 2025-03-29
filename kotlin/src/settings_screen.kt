@@ -17,11 +17,11 @@ fun SettingsScreen(
     onMandelbrotGeneratorChanged: (MandelbrotGenerator) -> Unit,
 ) {
     var generatorType by remember { mutableStateOf(generator.getType()) }
-    var centerX by remember { mutableStateOf(generator.centerX) }
-    var centerY by remember { mutableStateOf(generator.centerY) }
-    var range by remember { mutableStateOf(generator.range) }
-    var bitmapSize by remember { mutableStateOf(generator.bitmapSize) }
-    var maxIter by remember { mutableStateOf(generator.maxIter) }
+    var centerX by remember { mutableStateOf(generator.centerX.toString()) }
+    var centerY by remember { mutableStateOf(generator.centerY.toString()) }
+    var range by remember { mutableStateOf(generator.range.toString()) }
+    var bitmapSize by remember { mutableStateOf(generator.bitmapSize.toString()) }
+    var maxIter by remember { mutableStateOf(generator.maxIter.toString()) }
     
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -42,12 +42,8 @@ fun SettingsScreen(
                     label = { Text("Center X") },
                     placeholder = { Text("0.0") },
                     value = centerX.toString(),
-                    onValueChange = {
-                        val v = it.toDoubleOrNull()
-                        if (v != null) {
-                            centerX = v
-                        }
-                    },
+                    onValueChange = { centerX = it },
+                    isError = centerX.toDoubleOrNull() == null,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number
@@ -61,12 +57,8 @@ fun SettingsScreen(
                     label = { Text("Center Y") },
                     placeholder = { Text("0.0") },
                     value = centerY.toString(),
-                    onValueChange = {
-                        val v = it.toDoubleOrNull()
-                        if (v != null) {
-                            centerY = v
-                        }
-                    },
+                    onValueChange = { centerY = it },
+                    isError = centerY.toDoubleOrNull() == null,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number
@@ -81,12 +73,8 @@ fun SettingsScreen(
                 label = { Text("Range") },
                 placeholder = { Text("3.0") },
                 value = range.toString(),
-                onValueChange = {
-                    val v = it.toDoubleOrNull()
-                    if (v != null && v > 0) {
-                        range = v
-                    }
-                },
+                onValueChange = { range = it },
+                isError = range.toDoubleOrNull() == null,
                 singleLine = false,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number
@@ -100,12 +88,8 @@ fun SettingsScreen(
                 label = { Text("Bitmap Size") },
                 placeholder = { Text("512") },
                 value = bitmapSize.toString(),
-                onValueChange = {
-                    val v = it.toIntOrNull()
-                    if (v != null && bitmapSize > 1) {
-                        bitmapSize = v
-                    }
-                },
+                onValueChange = { bitmapSize = it },
+                isError = !checkBitmapSize(bitmapSize),
                 singleLine = false,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number
@@ -119,12 +103,8 @@ fun SettingsScreen(
                 label = { Text("Max Iterations") },
                 placeholder = { Text("100") },
                 value = maxIter.toString(),
-                onValueChange = {
-                    val v = it.toIntOrNull()
-                    if (v != null && maxIter > 1) {
-                        maxIter = v
-                    }
-                },
+                onValueChange = { maxIter = it },
+                isError = !checkMaxIter(maxIter),
                 singleLine = false,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number
@@ -178,16 +158,38 @@ fun SettingsScreen(
         Button(
             onClick = {
                 val gen = MandelbrotGenerator.fromType(generatorType)
-                gen.centerX = centerX
-                gen.centerY = centerY
-                gen.range = range
-                gen.bitmapSize = bitmapSize
-                gen.maxIter = maxIter
+                gen.centerX = centerX.toDoubleOrNull()!!
+                gen.centerY = centerY.toDoubleOrNull()!!
+                gen.range = range.toDoubleOrNull()!!
+                gen.bitmapSize = bitmapSize.toIntOrNull()!!
+                gen.maxIter = maxIter.toIntOrNull()!!
+
+                if (!checkMaxIter(maxIter) || !checkBitmapSize(bitmapSize)) {
+                    throw RuntimeException("unreachable")
+                }
+
                 onMandelbrotGeneratorChanged(gen)
             },
+            enabled = true &&
+                centerX.toDoubleOrNull() != null &&
+                centerY.toDoubleOrNull() != null &&
+                range.toDoubleOrNull() != null &&
+                checkBitmapSize(bitmapSize) &&
+                checkMaxIter(maxIter),
+
             modifier = Modifier.padding(5.dp)
         ) {
             Text("Apply")
         }
     }
+}
+
+private fun checkBitmapSize(bitmapSize: String): Boolean {
+    val v = bitmapSize.toIntOrNull()
+    return v != null && v >= 1
+}
+
+private fun checkMaxIter(maxIter: String): Boolean {
+    val v = maxIter.toIntOrNull()
+    return v != null && v >= 1
 }
