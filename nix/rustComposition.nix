@@ -11,6 +11,7 @@
   target = let
     abiToTarget = {
       "x86_64" = "x86_64-linux-android";
+      "arm64-v8a" = "aarch64-linux-android";
     };
 
     inherit (cfg.versions) abi;

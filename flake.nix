@@ -56,7 +56,7 @@
 
         # x86_64 allows running emulator on x86_64 machine,
         # but is likely incompable with your physical device
-        abi = "x86_64";
+        abi = "arm64-v8a";
 
         jvm-target = "1.8";
 
