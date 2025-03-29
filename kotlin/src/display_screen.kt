@@ -38,14 +38,10 @@ fun DisplayScreen(
         modifier = Modifier
             .fillMaxSize()
             .transformable(rememberTransformableState { deltaZoom, deltaOffset, _deltaRotation ->
-                // TODO: use clone here
-                val oldGen = mandelbrotGenerator
-                val gen = MandelbrotGenerator.fromType(oldGen.getType())
-                gen.range = oldGen.range / deltaZoom
-                gen.centerX = oldGen.centerX - deltaOffset.x * gen.range / imageSize.width
-                gen.centerY = oldGen.centerY - deltaOffset.y * gen.range / imageSize.height
-                gen.bitmapSize = oldGen.bitmapSize
-                gen.maxIter = oldGen.maxIter
+                val gen = MandelbrotGenerator.clone(mandelbrotGenerator)
+                gen.range /= deltaZoom
+                gen.centerX -= deltaOffset.x * gen.range / imageSize.width
+                gen.centerY -= deltaOffset.y * gen.range / imageSize.height
                 onMandelbrotGeneratorChanged(gen)
             })
     )

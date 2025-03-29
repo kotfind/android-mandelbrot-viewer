@@ -35,6 +35,16 @@ abstract class MandelbrotGenerator {
                 else -> throw IllegalArgumentException("Unknown generator type: $type")
             }
         }
+
+        fun clone(oldGen: MandelbrotGenerator): MandelbrotGenerator {
+            val newGen = MandelbrotGenerator.fromType(oldGen.getType())
+            newGen.centerX = oldGen.centerX
+            newGen.centerY = oldGen.centerY
+            newGen.range = oldGen.range
+            newGen.bitmapSize = oldGen.bitmapSize
+            newGen.maxIter = oldGen.maxIter
+            return newGen
+        }
     }
 }
 
