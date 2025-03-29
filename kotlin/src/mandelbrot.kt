@@ -14,11 +14,34 @@ abstract class MandelbrotGenerator {
 
     var maxIter: Int = 100
 
-    abstract fun genBitmap(): Bitmap
+    final fun genBitmap(): Bitmap {
+        val pixels = genPixels()
+
+        if (pixels.size != bitmapSize * bitmapSize) {
+            throw IllegalStateException("Pixel array size is not equal to bitmap size.")
+        }
+
+        var bitmap = Bitmap.createBitmap(bitmapSize, bitmapSize, Bitmap.Config.ARGB_8888)
+        bitmap.setPixels(pixels, 0, bitmapSize, 0, 0, bitmapSize, bitmapSize)
+        return bitmap
+    }
+
+    protected abstract fun genPixels(): IntArray
+}
+
+class RustMandelbrotGenerator : MandelbrotGenerator() {
+    companion object {
+        init {
+            // XXX: hardcoded "rust_jni"
+            System.loadLibrary("rust_jni")
+        }
+    }
+
+    override external fun genPixels(): IntArray
 }
 
 class KotlinMandelbrotGenerator : MandelbrotGenerator() {
-    override fun genBitmap(): Bitmap {
+    override fun genPixels(): IntArray {
         val pixels = IntArray(bitmapSize * bitmapSize)
 
         for (y in 0..<bitmapSize) {
@@ -34,10 +57,7 @@ class KotlinMandelbrotGenerator : MandelbrotGenerator() {
             }
         }
 
-        var bitmap = Bitmap.createBitmap(bitmapSize, bitmapSize, Bitmap.Config.ARGB_8888)
-        bitmap.setPixels(pixels, 0, bitmapSize, 0, 0, bitmapSize, bitmapSize)
-
-        return bitmap
+        return pixels
     }
 
     private fun getPointIters(c: Complex): Int {

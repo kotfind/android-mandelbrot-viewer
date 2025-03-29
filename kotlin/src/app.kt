@@ -14,7 +14,7 @@ import kotlinx.coroutines.*
 @Composable
 fun App() {
     var mandelbrotGenerator by remember {
-        mutableStateOf<MandelbrotGenerator>(KotlinMandelbrotGenerator())
+        mutableStateOf<MandelbrotGenerator>(RustMandelbrotGenerator())
     }
 
     var mandelbrotBitmap by remember {
